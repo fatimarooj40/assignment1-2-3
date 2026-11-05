@@ -1,0 +1,404 @@
+/* =========================================================
+   Islamabad Tech Summit 2026 - styles.css
+
+   1. Box model reset
+   2. Base text styles
+   3. Layout container
+   4. Header
+   5. Navigation (Flexbox)
+   6. Main content
+   7. Cards (Grid)
+   8. Table
+   9. Form
+   10. Footer
+   11. Responsive rules (media query)
+   ========================================================= */
+
+
+/* 1. Box model reset
+   With border-box, width includes content + padding + border */
+* {
+  box-sizing: border-box;
+}
+
+
+/* 2. Base text styles (element selectors) */
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 18px;
+  line-height: 1.6;
+  color: #1f1f1f;
+  background-color: #f7f5f0;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0 0 16px;
+  font-family: Georgia, "Times New Roman", serif;
+  line-height: 1.25;
+  color: #0b3d5c;
+}
+
+h1 {
+  font-size: 44px;
+}
+
+h2 {
+  padding-bottom: 8px;
+  border-bottom: 2px solid #d6d0c4;
+  font-size: 32px;
+}
+
+h3 {
+  font-size: 22px;
+}
+
+p {
+  margin: 0 0 16px;
+}
+
+a {
+  color: #0b3d5c;
+}
+
+a:hover {
+  color: #c2410c;
+}
+
+/* Keyboard focus outline so links and fields are easy to see */
+a:focus,
+button:focus,
+input:focus,
+textarea:focus {
+  outline: 3px solid #c2410c;
+  outline-offset: 2px;
+}
+
+/* Images never overflow their container */
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+ul,
+ol {
+  margin: 0 0 16px;
+  padding-left: 24px;
+}
+
+li {
+  margin-bottom: 8px;
+}
+
+/* The ordered list uses letters (A, B, C) instead of numbers */
+ol {
+  list-style-type: upper-alpha;
+}
+
+
+/* 3. Layout container (class selector)
+   Keeps content centred and stops it getting too wide */
+.container {
+  width: min(92%, 1100px);
+  margin-inline: auto;
+}
+
+
+/* 4. Header */
+header {
+  padding: 48px 0;
+  background-color: #0b3d5c;
+  color: #ffffff;
+}
+
+/* Descendant selectors: only elements inside the header */
+header h1 {
+  color: #ffffff;
+}
+
+header p {
+  max-width: 640px;
+  font-size: 20px;
+}
+
+/* Buttons (used for links and form buttons) */
+.button {
+  display: inline-block;
+  padding: 12px 24px;
+  border: 2px solid #c2410c;
+  border-radius: 4px;
+  background-color: #c2410c;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: bold;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.button:hover {
+  border-color: #9a3412;
+  background-color: #9a3412;
+  color: #ffffff;
+}
+
+.button-secondary {
+  border-color: #0b3d5c;
+  background-color: #ffffff;
+  color: #0b3d5c;
+}
+
+.button-secondary:hover {
+  border-color: #0b3d5c;
+  background-color: #e6edf1;
+  color: #0b3d5c;
+}
+
+
+/* 5. Navigation (Flexbox) */
+nav {
+  border-bottom: 1px solid #d6d0c4;
+  background-color: #ffffff;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 24px;
+  margin: 0;
+  padding: 16px 0;
+  list-style: none;
+}
+
+nav li {
+  margin-bottom: 0;
+}
+
+nav a {
+  font-weight: bold;
+  text-decoration: none;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+
+/* 6. Main content */
+section {
+  padding: 48px 0;
+}
+
+figure {
+  margin: 32px 0;
+}
+
+figcaption {
+  margin-top: 8px;
+  font-size: 16px;
+  color: #4a4a4a;
+}
+
+/* Two lists side by side (Flexbox) */
+.two-columns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+}
+
+/* Direct child selector: only the divs placed directly inside .two-columns */
+.two-columns > div {
+  flex: 1 1 300px;
+}
+
+/* Side note box in the register section */
+aside {
+  margin-bottom: 32px;
+  padding: 24px;
+  border: 1px solid #cfc8ba;
+  border-radius: 8px;
+  background-color: #ffffff;
+}
+
+aside p:last-child {
+  margin-bottom: 0;
+}
+
+
+/* 7. Cards (Grid) */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.card {
+  padding: 24px;
+  border: 1px solid #cfc8ba;
+  border-radius: 8px;
+  background-color: #ffffff;
+}
+
+/* Direct child selector */
+.card > h3 {
+  margin-top: 0;
+}
+
+/* Descendant selector */
+.card .meta {
+  font-weight: bold;
+  color: #0b3d5c;
+}
+
+
+/* 8. Table */
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+  background-color: #ffffff;
+}
+
+caption {
+  padding-bottom: 8px;
+  text-align: left;
+  font-weight: bold;
+  color: #0b3d5c;
+}
+
+th,
+td {
+  padding: 12px 16px;
+  border: 1px solid #cfc8ba;
+  text-align: left;
+}
+
+th {
+  background-color: #0b3d5c;
+  color: #ffffff;
+}
+
+
+/* 9. Form (ID selector for the section, then descendants) */
+#register form {
+  max-width: 640px;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.field {
+  display: block;
+  width: 100%;
+  margin-bottom: 24px;
+  padding: 12px;
+  border: 1px solid #555555;
+  border-radius: 4px;
+  background-color: #ffffff;
+  color: #1f1f1f;
+  font-family: inherit;
+  font-size: 18px;
+}
+
+fieldset {
+  margin: 0 0 24px;
+  padding: 16px 24px;
+  border: 1px solid #cfc8ba;
+  border-radius: 8px;
+}
+
+legend {
+  padding: 0 8px;
+  font-weight: bold;
+  color: #0b3d5c;
+}
+
+/* Radio and checkbox rows */
+.choice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.choice input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+}
+
+.choice label {
+  margin-bottom: 0;
+  font-weight: normal;
+}
+
+.form-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+
+/* 10. Footer */
+footer {
+  padding: 32px 0;
+  background-color: #0b3d5c;
+  color: #ffffff;
+}
+
+footer p {
+  margin-bottom: 0;
+}
+
+footer a {
+  color: #ffffff;
+}
+
+footer a:hover {
+  color: #ffd8bf;
+}
+
+.footer-inner {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+
+/* 11. Responsive rules
+   On screens 800px wide or less, the cards stack in one column
+   and the spacing and headings get smaller */
+@media (max-width: 800px) {
+  h1 {
+    font-size: 34px;
+  }
+
+  h2 {
+    font-size: 28px;
+  }
+
+  header {
+    padding: 32px 0;
+  }
+
+  section {
+    padding: 32px 0;
+  }
+
+  .cards {
+    grid-template-columns: 1fr;
+  }
+}
