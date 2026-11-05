@@ -1,0 +1,284 @@
+/* =========================================================
+   Islamabad Tech Summit 2026 - script.js
+   1. Helpers
+   2. "See the time" buttons (scroll to schedule + highlight row)
+   3. Smooth scrolling for in-page links
+   4. Registration form validation
+   5. Clear form button
+   ========================================================= */
+
+document.addEventListener("DOMContentLoaded", function () {
+  "use strict";
+
+  /* ---------- 1. Helpers ---------- */
+
+  var prefersReducedMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)"
+  ).matches;
+
+  function scrollToElement(el) {
+    el.scrollIntoView({
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+      block: "center",
+    });
+  }
+
+  /* ---------- 2. "See the time" buttons ---------- */
+  // Each featured session card has a link. Clicking it scrolls to the
+  // matching row of the schedule table and highlights that row.
+
+  var sessionKeywords = ["responsive page", "phishing", "deploying"];
+  var cards = document.querySelectorAll(".card");
+  var tableRows = document.querySelectorAll("table tbody tr, table tr");
+
+  function highlightRow(keyword) {
+    var target = null;
+    tableRows.forEach(function (row) {
+      if (!target && row.textContent.toLowerCase().indexOf(keyword) !== -1) {
+        target = row;
+      }
+    });
+    if (!target) return;
+
+    scrollToElement(target);
+    var oldBackground = target.style.backgroundColor;
+    target.style.backgroundColor = "#ffe9d6";
+    setTimeout(function () {
+      target.style.backgroundColor = oldBackground;
+    }, 3000);
+  }
+
+  cards.forEach(function (card, index) {
+    var link = card.querySelector("a, button");
+    var keyword = sessionKeywords[index];
+    if (!link || !keyword) return;
+
+    link.addEventListener("click", function (event) {
+      event.preventDefault();
+      highlightRow(keyword);
+    });
+  });
+
+  /* ---------- 3. Smooth scrolling for in-page links ---------- */
+
+  document.querySelectorAll('a[href^="#"]').forEach(function (link) {
+    link.addEventListener("click", function (event) {
+      var id = link.getAttribute("href");
+      if (id.length < 2) return;
+      var target = document.querySelector(id);
+      if (!target) return;
+
+      event.preventDefault();
+      target.scrollIntoView({
+        behavior: prefersReducedMotion ? "auto" : "smooth",
+        block: "start",
+      });
+      history.replaceState(null, "", id);
+    });
+  });
+
+  /* ---------- 4. Registration form validation ---------- */
+
+  var form = document.querySelector("#register form") ||
+    document.querySelector("form");
+  if (!form) return;
+
+  var nameInput = form.querySelector('input[type="text"]');
+  var emailInput = form.querySelector('input[type="email"]');
+  var textInputs = form.querySelectorAll('input[type="text"]');
+  var organisationInput = textInputs.length > 1 ? textInputs[1] : null;
+  var radios = form.querySelectorAll('input[type="radio"]');
+  var checkboxes = form.querySelectorAll('input[type="checkbox"]');
+  var questions = form.querySelector("textarea");
+
+  // The form is checked by our own code, so turn off the browser's popups
+  form.setAttribute("novalidate", "novalidate");
+
+  // A box under the form buttons for the result message
+  var statusBox = document.createElement("div");
+  statusBox.setAttribute("role", "status");
+  statusBox.setAttribute("aria-live", "polite");
+  statusBox.style.marginTop = "24px";
+  form.appendChild(statusBox);
+
+  function clearErrors() {
+    form.querySelectorAll(".form-error").forEach(function (message) {
+      message.remove();
+    });
+    form
+      .querySelectorAll("[aria-invalid]")
+      .forEach(function (field) {
+        field.removeAttribute("aria-invalid");
+        field.style.borderColor = "";
+      });
+    statusBox.textContent = "";
+    statusBox.style.cssText = "margin-top: 24px;";
+  }
+
+  function showError(field, text) {
+    var message = document.createElement("p");
+    message.className = "form-error";
+    message.textContent = text;
+    message.style.color = "#b91c1c";
+    message.style.fontWeight = "bold";
+    message.style.margin = "-16px 0 24px";
+
+    if (field.tagName === "FIELDSET") {
+      field.appendChild(message);
+    } else {
+      field.setAttribute("aria-invalid", "true");
+      field.style.borderColor = "#b91c1c";
+      field.insertAdjacentElement("afterend", message);
+    }
+  }
+
+  function getAttendeeType() {
+    var type = "";
+    radios.forEach(function (radio) {
+      if (radio.checked) {
+        var label = form.querySelector('label[for="' + radio.id + '"]');
+        type = (label ? label.textContent : radio.value).trim().toLowerCase();
+      }
+    });
+    return type;
+  }
+
+  function getPrice(type) {
+    if (type.indexOf("student") !== -1) {
+      var earlyBirdEnds = new Date(2026, 10, 30, 23, 59, 59); // 30 Nov 2026
+      return new Date() <= earlyBirdEnds ? 1000 : 1500;
+    }
+    return 2500;
+  }
+
+  function checkboxLabel(box) {
+    var label = form.querySelector('label[for="' + box.id + '"]');
+    return label ? label.textContent.trim() : box.value;
+  }
+
+  // The HTML/CSS workshop and the phishing talk are both at 11:00 AM,
+  // so a person cannot attend both. Picking one unticks the other.
+  if (checkboxes.length >= 2) {
+    var workshopBox = checkboxes[0];
+    var phishingBox = checkboxes[1];
+
+    function avoidClash(changed, other) {
+      changed.addEventListener("change", function () {
+        if (changed.checked && other.checked) {
+          other.checked = false;
+          statusBox.textContent =
+            "The workshop and the phishing talk are both at 11:00 AM, " +
+            "so only one can be selected.";
+          statusBox.style.color = "#9a3412";
+          statusBox.style.fontWeight = "bold";
+        }
+      });
+    }
+    avoidClash(workshopBox, phishingBox);
+    avoidClash(phishingBox, workshopBox);
+  }
+
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+    clearErrors();
+
+    var firstInvalid = null;
+    function fail(field, text) {
+      showError(field, text);
+      if (!firstInvalid) firstInvalid = field;
+    }
+
+    // Full name
+    if (nameInput) {
+      var fullName = nameInput.value.trim();
+      if (fullName.length < 3) {
+        fail(nameInput, "Please enter your full name (at least 3 letters).");
+      } else if (!/^[A-Za-z\u0600-\u06FF .'-]+$/.test(fullName)) {
+        fail(nameInput, "Your name can only contain letters and spaces.");
+      }
+    }
+
+    // Email
+    if (emailInput) {
+      var email = emailInput.value.trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+        fail(emailInput, "Please enter a valid email address.");
+      }
+    }
+
+    // University or company
+    if (organisationInput && organisationInput.value.trim().length < 2) {
+      fail(organisationInput, "Please enter your university or company.");
+    }
+
+    // Student or Professional
+    var type = getAttendeeType();
+    if (radios.length && !type) {
+      var group = radios[0].closest("fieldset") || radios[0].parentElement;
+      fail(group, "Please choose Student or Professional.");
+    }
+
+    // Sessions: at least one must be selected
+    var chosenSessions = [];
+    checkboxes.forEach(function (box) {
+      if (box.checked) chosenSessions.push(checkboxLabel(box));
+    });
+    if (checkboxes.length && chosenSessions.length === 0) {
+      var sessionGroup =
+        checkboxes[0].closest("fieldset") || checkboxes[0].parentElement;
+      fail(sessionGroup, "Please select at least one session.");
+    }
+
+    if (firstInvalid) {
+      firstInvalid.scrollIntoView({
+        behavior: prefersReducedMotion ? "auto" : "smooth",
+        block: "center",
+      });
+      if (typeof firstInvalid.focus === "function") {
+        firstInvalid.focus({ preventScroll: true });
+      }
+      statusBox.textContent = "Please fix the errors above and try again.";
+      statusBox.style.color = "#b91c1c";
+      statusBox.style.fontWeight = "bold";
+      return;
+    }
+
+    // Everything is valid
+    var price = getPrice(type);
+    var firstName = nameInput.value.trim().split(" ")[0];
+
+    statusBox.textContent =
+      "Thank you, " + firstName + "! Your registration is received. " +
+      "Ticket: Rs. " + price.toLocaleString("en-US") +
+      " (" + type + "). Sessions: " + chosenSessions.join(", ") + ".";
+    statusBox.style.padding = "16px";
+    statusBox.style.border = "2px solid #15803d";
+    statusBox.style.borderRadius = "8px";
+    statusBox.style.backgroundColor = "#f0fdf4";
+    statusBox.style.color = "#14532d";
+    statusBox.style.fontWeight = "bold";
+
+    scrollToElement(statusBox);
+    form.reset();
+  });
+
+  /* ---------- 5. Clear form button ---------- */
+
+  form.addEventListener("reset", function () {
+    // Run after the browser has emptied the fields
+    setTimeout(clearErrors, 0);
+  });
+
+  var clearButton = Array.prototype.find.call(
+    form.querySelectorAll("button, input[type='button']"),
+    function (button) {
+      var text = (button.textContent || button.value || "").toLowerCase();
+      return text.indexOf("clear") !== -1 && button.type !== "reset";
+    }
+  );
+  if (clearButton) {
+    clearButton.addEventListener("click", function () {
+      form.reset();
+    });
+  }
+});
